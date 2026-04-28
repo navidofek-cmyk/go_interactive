@@ -24,6 +24,10 @@ Každá lekce je spustitelný Go program — učíš se děláním!
 | 11 | 🧬 Kouzelné funkce — generika | ⭐⭐⭐⭐ |
 | 12 | 🌐 Vlastní web — HTTP server | ⭐⭐⭐⭐⭐ |
 | 13 | 🏭 Továrna — paralelní zpracování | ⭐⭐⭐⭐⭐ |
+| 14 | 🚒 Chyby v týmu — errgroup | ⭐⭐⭐⭐⭐ |
+| 15 | ⏱️ Časový limit — context | ⭐⭐⭐⭐⭐ |
+| 16 | 🧪 Testování — go test | ⭐⭐⭐⭐ |
+| 17 | 🏙️ Microservices — malé spolupracující servery | ⭐⭐⭐⭐⭐ |
 
 ---
 

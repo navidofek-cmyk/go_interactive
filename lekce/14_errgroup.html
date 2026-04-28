@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 14: Chyby v týmu — errgroup</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.3rem;margin:1rem 0;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#d2a8ff;white-space:pre;}
+.diagram-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.sekce-title{font-size:1.15rem;font-weight:700;color:#ffa657;margin:2rem 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+html.light .diagram{background:var(--code-bg);}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+  <nav class="zpet"><a href="../index.html">← Zpět na přehled lekcí</a></nav>
+
+  <div class="lekce-header">
+    <h1>🚒 Lekce 14: Chyby v týmu — errgroup</h1>
+    <div class="meta">
+      <span>⭐⭐⭐⭐⭐ Výzva!</span>
+      <span>⏱️ ~35 minut</span>
+    </div>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>🤔 Co se naučíme?</h3>
+    <p>
+      Goroutina normálně nemůže "vrátit" chybu jako funkce — prostě skončí a nikdo se nic nedozví.
+      Co když ale kuchař spálí dort? Jak to ostatní poznají?
+    </p>
+    <p style="margin-top:.8rem;">
+      Řešení: použijeme <strong>kanál pro chyby</strong> (error channel). Každý kuchař pošle výsledek
+      (chybu nebo <code>nil</code>) do kanálu, a my je na konci sbíráme. Nebo použijeme
+      <code>errgroup</code> z balíčku <code>golang.org/x/sync</code> — ale to je jen
+      chytřejší wrapper okolo toho samého.
+    </p>
+    <div class="analogie">
+      🍰 Představ si pekárnu: kuchaři vaří najednou. Jeden dort shoří.
+      Kuchař zavolá "Spáleno!" do vysílačky (= error channel).
+      Šéfkuchař uslyší a ví, kdo měl problém — zatímco ostatní kuchaři klidně dál pracují.
+    </div>
+  </div>
+
+  <div class="diagram-label">Jak funguje error channel:</div>
+  <div class="diagram">Goroutina 1: vari()  ──→ errCh ──→ chyba? nil
+Goroutina 2: vari()  ──→ errCh ──→ chyba? "spáleno!"
+Goroutina 3: vari()  ──→ errCh ──→ chyba? nil
+                                 ↓
+                          sbíráme chyby</div>
+
+  <div class="sekce-title">📦 Sekce 1: Manuální error channel (pouze standardní knihovna)</div>
+
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: 14a_error_channel.go
+// Spusť: go run 14a_error_channel.go
+
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "sync"
+    "time"
+)
+
+// kuchař zkouší upéct dort — může se mu to pokazit
+func upecDort(id int, nazev string, errCh chan&lt;- error, wg *sync.WaitGroup) {
+    defer wg.Done()
+
+    fmt.Printf("👨‍🍳 Kuchař %d peče: %s\n", id, nazev)
+    time.Sleep(300 * time.Millisecond)
+
+    // 30% šance že dort shoří
+    if rand.Float32() &lt; 0.3 {
+        chyba := fmt.Errorf("kuchař %d: %s shořel! 🔥", id, nazev)
+        errCh &lt;- chyba
+        return
+    }
+
+    errCh &lt;- nil // nil = vše ok
+    fmt.Printf("✅ Kuchař %d dokončil: %s\n", id, nazev)
+}
+
+func main() {
+    dorty := []string{
+        "Čokoládový", "Jahodový", "Vanilkový",
+        "Ovocný", "Karamelový",
+    }
+
+    errCh := make(chan error, len(dorty))
+    var wg sync.WaitGroup
+
+    fmt.Println("🏭 Pekárna spuštěna!\n")
+
+    for i, dort := range dorty {
+        wg.Add(1)
+        go upecDort(i+1, dort, errCh, &amp;wg)
+    }
+
+    wg.Wait()
+    close(errCh)
+
+    // Sbíráme výsledky
+    fmt.Println("\n📋 Výsledky:")
+    var chyby []error
+    for err := range errCh {
+        if err != nil {
+            chyby = append(chyby, err)
+        }
+    }
+
+    if len(chyby) == 0 {
+        fmt.Println("🎉 Všechny dorty upečeny bez chyb!")
+    } else {
+        fmt.Printf("⚠️  %d dort(y) měly problémy:\n", len(chyby))
+        for _, e := range chyby {
+            fmt.Println(" ❌", e)
+        }
+    }
+}</code></pre>
+  </div>
+
+  <div class="vystup-label">Ukázkový výstup (výsledek je náhodný — někdy 0 chyb, někdy více):</div>
+  <div class="vystup">🏭 Pekárna spuštěna!
+
+👨‍🍳 Kuchař 1 peče: Čokoládový
+👨‍🍳 Kuchař 2 peče: Jahodový
+👨‍🍳 Kuchař 3 peče: Vanilkový
+👨‍🍳 Kuchař 4 peče: Ovocný
+👨‍🍳 Kuchař 5 peče: Karamelový
+✅ Kuchař 1 dokončil: Čokoládový
+✅ Kuchař 3 dokončil: Vanilkový
+✅ Kuchař 4 dokončil: Ovocný
+✅ Kuchař 5 dokončil: Karamelový
+
+📋 Výsledky:
+⚠️  1 dort(y) měly problémy:
+ ❌ kuchař 2: Jahodový shořel! 🔥</div>
+
+  <div class="sekce-title">🚀 Sekce 2: errgroup — čistší způsob (vyžaduje modul)</div>
+
+  <div class="vysvetleni">
+    <h3>💡 Co je errgroup?</h3>
+    <p>
+      <code>errgroup</code> je balíček z rodiny <code>golang.org/x/sync</code>. Dělá za tebe
+      přesně to, co jsi napsal v sekci 1 — spravuje WaitGroup i chybový kanál najednou.
+      Funkce <code>eg.Go()</code> spustí goroutinu a <code>eg.Wait()</code> počká na všechny
+      a vrátí první chybu (nebo <code>nil</code>).
+    </p>
+    <div class="analogie">
+      ⚠️ Před spuštěním tohoto příkladu je potřeba inicializovat Go modul a stáhnout balíček:<br>
+      <code style="font-style:normal;color:var(--text);">go mod init pekarna</code><br>
+      <code style="font-style:normal;color:var(--text);">go get golang.org/x/sync/errgroup</code>
+    </div>
+  </div>
+
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: 14b_errgroup.go
+// Nejprve spusť v terminálu:
+//   go mod init pekarna
+//   go get golang.org/x/sync/errgroup
+// Pak: go run 14b_errgroup.go
+
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "time"
+
+    "golang.org/x/sync/errgroup"
+)
+
+func upecDortEG(id int, nazev string) error {
+    fmt.Printf("👨‍🍳 Kuchař %d peče: %s\n", id, nazev)
+    time.Sleep(300 * time.Millisecond)
+
+    if rand.Float32() &lt; 0.3 {
+        return fmt.Errorf("kuchař %d: %s shořel! 🔥", id, nazev)
+    }
+
+    fmt.Printf("✅ Kuchař %d dokončil: %s\n", id, nazev)
+    return nil
+}
+
+func main() {
+    dorty := []string{"Čokoládový", "Jahodový", "Vanilkový", "Ovocný"}
+
+    var eg errgroup.Group
+
+    for i, dort := range dorty {
+        i, dort := i, dort // zachytíme proměnné pro goroutinu
+        eg.Go(func() error {
+            return upecDortEG(i+1, dort)
+        })
+    }
+
+    // Čekáme — vrátí první chybu nebo nil
+    if err := eg.Wait(); err != nil {
+        fmt.Println("\n❌ Nastala chyba:", err)
+    } else {
+        fmt.Println("\n🎉 Vše upečeno bez chyb!")
+    }
+}</code></pre>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>🔍 Rozdíl mezi oběma přístupy</h3>
+    <p>
+      <strong>Error channel (sekce 1):</strong> sbírá <em>všechny</em> chyby — víš přesně, kdo selhal.<br>
+      <strong>errgroup (sekce 2):</strong> vrátí jen <em>první</em> chybu a zbytek ignoruje —
+      jednodušší kód, ale méně detailů. Pro většinu situací to stačí.
+    </p>
+  </div>
+
+  <div class="ulohy">
+    <h3>🏋️ Úlohy k procvičení</h3>
+    <ol>
+      <li>
+        Změň pravděpodobnost shoření z <code>0.3</code> na <code>0.8</code> — co se stane?
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>// Změň řádek v upecDort:
+if rand.Float32() &lt; 0.8 {
+// Skoro vše shoří — dostaneš mnohem více chyb v výsledcích.</pre>
+        </details>
+      </li>
+      <li>
+        Přidej výpis "🔄 Zkouším znovu!" když dort shoří, a zkus ho upéct podruhé (retry).
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>func upecDort(id int, nazev string, errCh chan&lt;- error, wg *sync.WaitGroup) {
+    defer wg.Done()
+
+    fmt.Printf("👨‍🍳 Kuchař %d peče: %s\n", id, nazev)
+    time.Sleep(300 * time.Millisecond)
+
+    if rand.Float32() &lt; 0.3 {
+        fmt.Printf("🔄 Zkouším znovu: %s\n", nazev)
+        time.Sleep(300 * time.Millisecond)
+        if rand.Float32() &lt; 0.3 {
+            errCh &lt;- fmt.Errorf("kuchař %d: %s shořel podruhé! 🔥", id, nazev)
+            return
+        }
+    }
+
+    errCh &lt;- nil
+    fmt.Printf("✅ Kuchař %d dokončil: %s\n", id, nazev)
+}</pre>
+        </details>
+      </li>
+      <li>
+        Spočítej kolik kuchařů bylo úspěšných a kolik neúspěšných.
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>// V části "Sbíráme výsledky" v main():
+var chyby []error
+uspesnych := 0
+for err := range errCh {
+    if err != nil {
+        chyby = append(chyby, err)
+    } else {
+        uspesnych++
+    }
+}
+fmt.Printf("✅ Úspěšných: %d\n", uspesnych)
+fmt.Printf("❌ Neúspěšných: %d\n", len(chyby))</pre>
+        </details>
+      </li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+
+  <div class="page-nav">
+    <a href="13_parallel.html" class="nav-btn">← Továrna — paralelní zpracování</a>
+    <a href="15_context.html" class="nav-btn">Context — časový limit →</a>
+  </div>
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 14 / 16</footer>
+<script>
+hljs.highlightAll();
+const SLUG='14_errgroup';
+function toggleTheme(){const isLight=document.documentElement.classList.toggle('light');localStorage.setItem('theme',isLight?'light':'dark');document.querySelector('.theme-btn').textContent=isLight?'🌙':'☀️';}
+if(localStorage.getItem('theme')==='light'){document.documentElement.classList.add('light');document.querySelector('.theme-btn').textContent='🌙';}
+function kopiruj(btn){const code=btn.nextElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='Zkopírováno! ✓';setTimeout(()=>btn.textContent='Kopírovat',2000);});}
+function oznacHotovo(){const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){hotovo.delete(SLUG);btn.textContent='☐ Označit lekci jako hotovou';btn.classList.remove('done');}else{hotovo.add(SLUG);btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}localStorage.setItem('hotovo',JSON.stringify([...hotovo]));}
+(()=>{const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}})();
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 16: Testování — go test</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.3rem;margin:1rem 0;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#d2a8ff;white-space:pre;}
+.diagram-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.sekce-title{font-size:1.15rem;font-weight:700;color:#ffa657;margin:2rem 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.soubor-label{font-size:.82rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:.25rem .7rem;border-radius:5px 5px 0 0;display:inline-block;margin-bottom:-1px;}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-fail{background:#1f0a0a;border:1px solid #4a1a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#f85149;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+html.light .vystup-fail{background:#fff0f0;border-color:#f9c0bf;color:#d1242f;}
+html.light .diagram{background:var(--code-bg);}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+
+  <div class="lekce-header">
+    <h1>Lekce 16: 🧪 Testování — go test</h1>
+    <div class="meta">
+      <span>⭐⭐⭐⭐ Těžší</span>
+      <span>⏱ ~35 minut</span>
+      <span>Lekce 16 / 16</span>
+    </div>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>Co je testování?</h3>
+    <p>
+      Testování je jako <strong>kontrolní otázky pro tvůj program</strong>. Napíšeš test: <em>"Když zavolám funkci <code>Secti(3, 5)</code>, musím dostat 8."</em> Pak spustíš <code>go test</code> a Go ti řekne, jestli vše funguje správně.
+    </p>
+    <p style="margin-top:.7rem;">
+      Proč testovat? Představ si, že děláš velký <strong>LEGO hrad</strong>. Po každé změně zkontroluj, jestli se nezhroutil. Testy dělají totéž pro kód — hlídají, že nic nerozbíjíš.
+    </p>
+    <div class="analogie">
+      ✈️ Testy = kontrolní seznam pilota před letem. Pilot zkontroluje každou věc: "Motor OK? ✅ Palivo OK? ✅ Dveře OK? ✅". Teprve pak vzlétne. Programátor zkontroluje: "Secti(3,5)=8? ✅ Vydel(10,2)=5? ✅"
+    </div>
+    <p><strong>Pravidla testů v Go:</strong></p>
+    <ul style="margin-left:1.3rem;margin-top:.4rem;">
+      <li>Soubor musí mít příponu <code>_test.go</code></li>
+      <li>Funkce musí začínat <code>Test</code></li>
+      <li>Parametr je vždy <code>t *testing.T</code></li>
+      <li>Spustíš příkazem <code>go test ./...</code></li>
+    </ul>
+  </div>
+
+  <div class="diagram-label">Struktura projektu a výstup go test:</div>
+  <div class="diagram">Soubory v projektu:
+  matematika.go       ← funkce které píšeš
+  matematika_test.go  ← testy pro ty funkce
+
+Spuštění:
+  $ go test ./...
+  --- PASS: TestSecti (0.00s)    ✅ test prošel
+  --- FAIL: TestVydel (0.00s)    ❌ test selhal
+      Got 3, want 5</div>
+
+  <div class="sekce-title">1. Soubor s funkcemi</div>
+
+  <div class="soubor-label">matematika.go</div>
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: matematika.go
+// Toto jsou funkce, které budeme testovat
+
+package matematika
+
+import "fmt"
+
+// Secti vrátí součet dvou čísel
+func Secti(a, b int) int {
+    return a + b
+}
+
+// Vydel vrátí podíl — nebo chybu pokud dělíme nulou
+func Vydel(a, b int) (int, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("nelze dělit nulou")
+    }
+    return a / b, nil
+}
+
+// JeSude vrátí true pokud je číslo sudé
+func JeSude(n int) bool {
+    return n%2 == 0
+}
+
+// Maximum vrátí větší ze dvou čísel
+func Maximum(a, b int) int {
+    if a &gt; b {
+        return a
+    }
+    return b
+}</code></pre>
+  </div>
+
+  <div class="sekce-title">2. Testovací soubor</div>
+
+  <div class="soubor-label">matematika_test.go</div>
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: matematika_test.go
+// Spusť: go test ./...     nebo: go test -v ./...
+
+package matematika
+
+import "testing"
+
+// Základní test
+func TestSecti(t *testing.T) {
+    vysledek := Secti(3, 5)
+    if vysledek != 8 {
+        t.Errorf("Secti(3, 5) = %d, chci 8", vysledek)
+    }
+}
+
+// Table-driven test — testujeme víc příkladů najednou!
+func TestSectiVice(t *testing.T) {
+    priklady := []struct {
+        a, b     int
+        ocekavam int
+    }{
+        {1, 2, 3},
+        {0, 0, 0},
+        {-5, 5, 0},
+        {100, 200, 300},
+        {-3, -7, -10},
+    }
+
+    for _, p := range priklady {
+        vysledek := Secti(p.a, p.b)
+        if vysledek != p.ocekavam {
+            t.Errorf("Secti(%d, %d) = %d, chci %d",
+                p.a, p.b, vysledek, p.ocekavam)
+        }
+    }
+}
+
+func TestVydel(t *testing.T) {
+    // Správné dělení
+    v, err := Vydel(10, 2)
+    if err != nil {
+        t.Fatalf("Vydel(10,2) neočekávaná chyba: %v", err)
+    }
+    if v != 5 {
+        t.Errorf("Vydel(10,2) = %d, chci 5", v)
+    }
+
+    // Dělení nulou musí vrátit chybu
+    _, err = Vydel(5, 0)
+    if err == nil {
+        t.Error("Vydel(5,0) mělo vrátit chybu, ale vrátilo nil")
+    }
+}
+
+func TestJeSude(t *testing.T) {
+    // Subtesty — pojmenované skupiny testů
+    t.Run("sudá čísla", func(t *testing.T) {
+        for _, n := range []int{0, 2, 4, 100, -6} {
+            if !JeSude(n) {
+                t.Errorf("%d mělo být sudé", n)
+            }
+        }
+    })
+
+    t.Run("lichá čísla", func(t *testing.T) {
+        for _, n := range []int{1, 3, 7, 99, -5} {
+            if JeSude(n) {
+                t.Errorf("%d nemá být sudé", n)
+            }
+        }
+    })
+}
+
+func TestMaximum(t *testing.T) {
+    if Maximum(3, 7) != 7 {
+        t.Error("Maximum(3,7) mělo vrátit 7")
+    }
+    if Maximum(10, 2) != 10 {
+        t.Error("Maximum(10,2) mělo vrátit 10")
+    }
+    if Maximum(5, 5) != 5 {
+        t.Error("Maximum(5,5) mělo vrátit 5")
+    }
+}</code></pre>
+  </div>
+
+  <div class="sekce-title">3. Jak spustit testy</div>
+
+  <div class="diagram-label">Příkazy v terminálu:</div>
+  <div class="diagram">$ go test ./...                  — spustí všechny testy
+$ go test -v ./...               — podrobný výpis (verbose)
+$ go test -run TestSecti ./...   — jen konkrétní test
+$ go test -cover ./...           — kolik kódu je otestováno</div>
+
+  <div class="sekce-title">Výsledky testů</div>
+
+  <div class="vystup-label">📺 Příklad úspěšných testů (go test -v ./...):</div>
+  <div class="vystup">$ go test -v ./...
+=== RUN   TestSecti
+--- PASS: TestSecti (0.00s)
+=== RUN   TestSectiVice
+--- PASS: TestSectiVice (0.00s)
+=== RUN   TestVydel
+--- PASS: TestVydel (0.00s)
+=== RUN   TestJeSude
+=== RUN   TestJeSude/sudá_čísla
+=== RUN   TestJeSude/lichá_čísla
+--- PASS: TestJeSude (0.00s)
+=== RUN   TestMaximum
+--- PASS: TestMaximum (0.00s)
+PASS
+ok      matematika      0.003s</div>
+
+  <div class="vystup-label">📺 Příklad selhání testu:</div>
+  <div class="vystup-fail">$ go test -v ./...
+=== RUN   TestSecti
+    matematika_test.go:9: Secti(3, 5) = 9, chci 8
+--- FAIL: TestSecti (0.00s)
+FAIL
+FAIL    matematika      0.002s</div>
+
+  <div class="ulohy">
+    <h3>Úkoly na procvičení</h3>
+    <ol>
+      <li>
+        Přidej funkci <code>Nasob(a, b int) int</code> do <code>matematika.go</code> a napiš test <code>TestNasob</code> pro ni.
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>// matematika.go:
+func Nasob(a, b int) int { return a * b }
+
+// matematika_test.go:
+func TestNasob(t *testing.T) {
+    if Nasob(3, 4) != 12 { t.Errorf("Nasob(3,4) != 12") }
+    if Nasob(0, 5) != 0  { t.Errorf("Nasob(0,5) != 0") }
+}</pre>
+        </details>
+      </li>
+      <li>
+        Záměrně udělej chybu v <code>Secti</code> (<code>return a - b</code> místo <code>a + b</code>) a spusť testy — co uvidíš?
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>Test TestSectiVice selže: "Secti(1, 2) = -1, chci 3"
+a výpis bude červený FAIL.</pre>
+        </details>
+      </li>
+      <li>
+        Spusť <code>go test -cover ./...</code> — co ti ukáže číslo coverage?
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>Procento kódu pokrytého testy, např.
+"coverage: 85.7% of statements"</pre>
+        </details>
+      </li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+
+  <div class="page-nav">
+    <a class="nav-btn" href="15_context.html">← Context — časový limit</a>
+    <a class="nav-btn" href="../index.html">🏠 Zpět na přehled — jsi mistr! 🏆</a>
+  </div>
+
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 16 / 16</footer>
+<script>
+hljs.highlightAll();
+const SLUG='16_testovani';
+function toggleTheme(){const isLight=document.documentElement.classList.toggle('light');localStorage.setItem('theme',isLight?'light':'dark');document.querySelector('.theme-btn').textContent=isLight?'🌙':'☀️';}
+if(localStorage.getItem('theme')==='light'){document.documentElement.classList.add('light');document.querySelector('.theme-btn').textContent='🌙';}
+function kopiruj(btn){const code=btn.nextElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='Zkopírováno! ✓';setTimeout(()=>btn.textContent='Kopírovat',2000);});}
+function oznacHotovo(){const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){hotovo.delete(SLUG);btn.textContent='☐ Označit lekci jako hotovou';btn.classList.remove('done');}else{hotovo.add(SLUG);btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}localStorage.setItem('hotovo',JSON.stringify([...hotovo]));}
+(()=>{const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}})();
+</script>
+</body>
+</html>

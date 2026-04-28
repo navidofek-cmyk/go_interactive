@@ -98,7 +98,7 @@ html.light {
 <header>
   <h1>🐹 Naučíme se Go!</h1>
   <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
-    <span class="badge">12 lekcí</span>
+    <span class="badge">17 lekcí</span>
     <button class="theme-btn" onclick="toggleTheme()" title="Světlé / tmavé">☀️</button>
   </div>
 </header>
@@ -238,9 +238,9 @@ html.light {
       <span style="font-size:1.8rem">🏆</span>
       <div>
         <h2>Finále — vlastní projekty!</h2>
-        <p>Generika, HTTP server a továrna — ukážeš, co umíš</p>
+        <p>Generika, HTTP, továrna, errgroup, context, testování, microservices</p>
       </div>
-      <span class="sekce-badge" style="background:#2a2010;color:#ffa657;">3 lekce</span>
+      <span class="sekce-badge" style="background:#2a2010;color:#ffa657;">8 lekcí</span>
     </div>
     <div class="grid">
       <a class="card" href="lekce/11_generika.html" data-slug="11_generika">
@@ -260,6 +260,30 @@ html.light {
         <div class="card-title">🏭 Továrna — paralelní zpracování</div>
         <div class="popis">Worker Pool a Pipeline — továrna na dorty!</div>
         <div class="stars">⭐⭐⭐⭐⭐ Výzva!</div>
+      </a>
+      <a class="card" href="lekce/14_errgroup.html" data-slug="14_errgroup">
+        <div class="num">Lekce 14</div>
+        <div class="card-title">🚒 Chyby v týmu — errgroup</div>
+        <div class="popis">Co když jedna goroutina selže? Zachytíme to!</div>
+        <div class="stars">⭐⭐⭐⭐⭐ Výzva!</div>
+      </a>
+      <a class="card" href="lekce/15_context.html" data-slug="15_context">
+        <div class="num">Lekce 15</div>
+        <div class="card-title">⏱️ Časový limit — context</div>
+        <div class="popis">Stopky pro goroutiny — "máš 2 sekundy!"</div>
+        <div class="stars">⭐⭐⭐⭐⭐ Výzva!</div>
+      </a>
+      <a class="card" href="lekce/16_testovani.html" data-slug="16_testovani">
+        <div class="num">Lekce 16</div>
+        <div class="card-title">🧪 Testování — go test</div>
+        <div class="popis">Kontrolní otázky pro tvůj kód — vždy zelené!</div>
+        <div class="stars">⭐⭐⭐⭐ Těžší</div>
+      </a>
+      <a class="card" href="lekce/17_microservices.html" data-slug="17_microservices">
+        <div class="num">Lekce 17</div>
+        <div class="card-title">🏙️ Microservices — malé spolupracující servery</div>
+        <div class="popis">Restaurace ze 3 serverů — menu, dezerty, gateway</div>
+        <div class="stars">⭐⭐⭐⭐⭐ Mistrovská výzva!</div>
       </a>
     </div>
   </div>
@@ -282,6 +306,10 @@ const LEKCE = [
   {cislo:11, titul:"Kouzelné funkce — generika",         slug:"11_generika",          sekce:"Finále"},
   {cislo:12, titul:"Vlastní web — HTTP server",          slug:"12_http_server",       sekce:"Finále"},
   {cislo:13, titul:"Továrna — paralelní zpracování",     slug:"13_parallel",          sekce:"Finále"},
+  {cislo:14, titul:"Chyby v týmu — errgroup",           slug:"14_errgroup",           sekce:"Finále"},
+  {cislo:15, titul:"Časový limit — context",             slug:"15_context",            sekce:"Finále"},
+  {cislo:16, titul:"Testování — go test",               slug:"16_testovani",          sekce:"Finále"},
+  {cislo:17, titul:"Microservices — malé spolupracující servery", slug:"17_microservices", sekce:"Finále"},
 ];
 
 function toggleTheme() {

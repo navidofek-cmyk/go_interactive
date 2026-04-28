@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 17: Microservices — malé spolupracující servery</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.4rem;margin:1rem 0;font-family:'Cascadia Code','Fira Code',monospace;font-size:.87rem;color:#d2a8ff;white-space:pre;overflow-x:auto;}
+.diagram-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.sekce-title{font-size:1.15rem;font-weight:700;color:#ffa657;margin:2rem 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.soubor-label{font-size:.82rem;color:#3fb950;background:var(--surface);border:1px solid var(--border);border-bottom:none;padding:.3rem .8rem;border-radius:6px 6px 0 0;display:inline-block;font-family:'Cascadia Code','Fira Code',monospace;}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:0 10px 10px 10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.terminal{background:#0d0d0d;border:1px solid #333;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#e6edf3;white-space:pre;}
+.terminal .prompt{color:#3fb950;}
+.terminal .out{color:#8b949e;}
+.terminal-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.tip{background:#1c2a1c;border:1px solid #2a4a2a;border-radius:10px;padding:.9rem 1.2rem;margin:1rem 0;font-size:.95rem;}
+.tip strong{color:#3fb950;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod,html.light .terminal{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+html.light .diagram{background:var(--code-bg);}
+html.light .tip{background:#f0fff0;border-color:#a5d6a7;}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+  <nav class="zpet"><a href="../index.html">← Zpět na přehled lekcí</a></nav>
+
+  <div class="lekce-header">
+    <h1>Lekce 17: 🏙️ Microservices — malé spolupracující servery</h1>
+    <div class="meta">
+      <span>📄 3 soubory · 3 terminály</span>
+      <span>⭐⭐⭐⭐⭐ Mistrovská výzva!</span>
+      <span>⏱ ~50 minut</span>
+    </div>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>🤔 Co jsou microservices?</h3>
+    <p>
+      Velký program se dá rozdělit na <strong>malé, samostatné servery</strong> — každý dělá jen jednu věc.
+      Navzájem si volají přes HTTP, jako kdyby si posílaly zprávy.
+    </p>
+    <p style="margin-top:.6rem">
+      Tak funguje třeba <strong>Netflix</strong>: jeden server hledá filmy, druhý řeší platby,
+      třetí doporučuje co sledovat — každý je samostatný program!
+    </p>
+    <div class="analogie">
+      💡 <strong>Analogie — restaurace:</strong> Šéfkuchař nedělá všechno sám.
+      Má kuchaře na pizzu (port 8081), kuchaře na dezerty (port 8082)
+      a číšníka (port 8080) který objednávky přerozděluje.
+      Každý je "microservice" — malá, samostatná služba.
+    </div>
+  </div>
+
+  <div class="diagram-label">Jak naše microservices spolu mluví:</div>
+  <div class="diagram">
+  Prohlížeč / curl
+       ↓  HTTP GET :8080
+  ┌────────────────────┐
+  │  🌐 GATEWAY        │  port 8080  ← hlavní vstupní bod
+  │  "Číšník"          │
+  └────────┬───────────┘
+           │ volá ostatní služby
+    ┌──────┴──────┐
+    ↓             ↓
+┌──────────┐  ┌──────────┐
+│ 🍕 MENU  │  │ 🍰 DEZERT│
+│ port 8081│  │ port 8082│
+└──────────┘  └──────────┘
+  vrátí JSON    vrátí JSON
+  </div>
+
+  <!-- SLUZBA MENU -->
+  <div class="sekce-title">🍕 Služba 1: Menu server (port 8081)</div>
+  <p style="color:var(--muted);margin-bottom:1rem;font-size:.95rem">
+    Spusť v <strong>Terminálu 1</strong>: <code style="background:var(--code-bg);padding:.1rem .4rem;border-radius:4px">go run sluzba_menu.go</code>
+  </p>
+
+  <div class="soubor-label">📄 sluzba_menu.go</div>
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: sluzba_menu.go
+// Spusť v Terminálu 1: go run sluzba_menu.go
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// Jidlo popisuje položku na menu
+type Jidlo struct {
+	Nazev string `json:"nazev"`
+	Cena  int    `json:"cena"`
+	Emoji string `json:"emoji"`
+}
+
+// Naše menu
+var menu = []Jidlo{
+	{Nazev: "Margherita", Cena: 180, Emoji: "🍕"},
+	{Nazev: "Hawai",      Cena: 200, Emoji: "🍕"},
+	{Nazev: "Bolognese",  Cena: 160, Emoji: "🍝"},
+	{Nazev: "Caesar",     Cena: 140, Emoji: "🥗"},
+}
+
+func menuHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("📋 Někdo si žádá menu!")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(menu)
+}
+
+func main() {
+	http.HandleFunc("/menu", menuHandler)
+	fmt.Println("🍕 Menu server běží na http://localhost:8081")
+	fmt.Println("   Zkus: curl http://localhost:8081/menu")
+	http.ListenAndServe(":8081", nil)
+}
+</code></pre>
+  </div>
+
+  <div class="vystup-label">📺 Terminál 1 po spuštění:</div>
+  <div class="vystup">🍕 Menu server běží na http://localhost:8081
+   Zkus: curl http://localhost:8081/menu
+📋 Někdo si žádá menu!
+📋 Někdo si žádá menu!</div>
+
+  <!-- SLUZBA DEZERTY -->
+  <div class="sekce-title">🍰 Služba 2: Dezerty server (port 8082)</div>
+  <p style="color:var(--muted);margin-bottom:1rem;font-size:.95rem">
+    Spusť v <strong>Terminálu 2</strong>: <code style="background:var(--code-bg);padding:.1rem .4rem;border-radius:4px">go run sluzba_dezerty.go</code>
+  </p>
+
+  <div class="soubor-label">📄 sluzba_dezerty.go</div>
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: sluzba_dezerty.go
+// Spusť v Terminálu 2: go run sluzba_dezerty.go
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+type Dezert struct {
+	Nazev  string `json:"nazev"`
+	Kalorie int   `json:"kalorie"`
+	Emoji  string `json:"emoji"`
+}
+
+var dezerty = []Dezert{
+	{Nazev: "Tiramisu",       Kalorie: 350, Emoji: "🍰"},
+	{Nazev: "Čokoládový dort",Kalorie: 420, Emoji: "🎂"},
+	{Nazev: "Zmrzlina",       Kalorie: 200, Emoji: "🍦"},
+	{Nazev: "Crème brûlée",   Kalorie: 310, Emoji: "🍮"},
+}
+
+func dezertyHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("🍰 Někdo chce dezerty!")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(dezerty)
+}
+
+func main() {
+	http.HandleFunc("/dezerty", dezertyHandler)
+	fmt.Println("🍰 Dezert server běží na http://localhost:8082")
+	fmt.Println("   Zkus: curl http://localhost:8082/dezerty")
+	http.ListenAndServe(":8082", nil)
+}
+</code></pre>
+  </div>
+
+  <!-- GATEWAY -->
+  <div class="sekce-title">🌐 Služba 3: Gateway — číšník (port 8080)</div>
+  <p style="color:var(--muted);margin-bottom:1rem;font-size:.95rem">
+    Spusť v <strong>Terminálu 3</strong>: <code style="background:var(--code-bg);padding:.1rem .4rem;border-radius:4px">go run gateway.go</code>
+    — pak otevři <code style="background:var(--code-bg);padding:.1rem .4rem;border-radius:4px">http://localhost:8080</code>
+  </p>
+
+  <div class="soubor-label">📄 gateway.go</div>
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: gateway.go
+// Spusť v Terminálu 3: go run gateway.go
+// Pak otevři: http://localhost:8080
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+// Zavolá jinou microservice a vrátí odpověď jako text
+func zavolajSluzbu(url string) string {
+	resp, err := http.Get(url)
+	if err != nil {
+		return fmt.Sprintf(`"chyba: %v"`, err)
+	}
+	defer resp.Body.Close()
+	data, _ := io.ReadAll(resp.Body)
+	return string(data)
+}
+
+func hlavniHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("🌐 Gateway: přišel požadavek, ptám se na služby...")
+
+	// Zavoláme obě služby paralelně!
+	menuCh := make(chan string, 1)
+	dezertCh := make(chan string, 1)
+
+	go func() { menuCh &lt;- zavolajSluzbu("http://localhost:8081/menu") }()
+	go func() { dezertCh &lt;- zavolajSluzbu("http://localhost:8082/dezerty") }()
+
+	menuData := &lt;-menuCh
+	dezertData := &lt;-dezertCh
+
+	// Vrátíme HTML stránku zákazníkovi
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprintf(w, `&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;
+&lt;style&gt;
+  body { font-family: Arial; background: #0d1117; color: #e6edf3;
+         max-width: 800px; margin: 2rem auto; padding: 1rem; }
+  h1 { color: #58a6ff; }
+  h2 { color: #ffa657; margin-top: 2rem; }
+  pre { background: #161b22; padding: 1rem; border-radius: 8px;
+        overflow-x: auto; color: #3fb950; font-size: .9rem; }
+  .badge { background: #1f6feb; padding: .2rem .6rem; border-radius: 999px;
+           font-size: .75rem; margin-left: .5rem; }
+&lt;/style&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;🍽️ Restaurace Go &lt;span class="badge"&gt;microservices&lt;/span&gt;&lt;/h1&gt;
+  &lt;p&gt;Gateway zavolala 2 microservices a spojila výsledky:&lt;/p&gt;
+  &lt;h2&gt;🍕 Menu (ze služby :8081)&lt;/h2&gt;
+  &lt;pre&gt;%s&lt;/pre&gt;
+  &lt;h2&gt;🍰 Dezerty (ze služby :8082)&lt;/h2&gt;
+  &lt;pre&gt;%s&lt;/pre&gt;
+&lt;/body&gt;&lt;/html&gt;`, menuData, dezertData)
+
+	fmt.Println("✅ Gateway: odpověď odeslána!")
+}
+
+func main() {
+	http.HandleFunc("/", hlavniHandler)
+	fmt.Println("🌐 Gateway běží na http://localhost:8080")
+	fmt.Println("   Otevři prohlížeč na: http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
+}
+</code></pre>
+  </div>
+
+  <div class="tip">
+    <strong>💡 Proč volat služby paralelně?</strong>
+    Gateway spouští obě HTTP volání jako goroutiny najednou — menu i dezerty se načítají
+    současně. Pokud by každé trvalo 100ms, celkem zaplatíme 100ms (ne 200ms).
+    Tohle je v reálných systémech obrovský rozdíl!
+  </div>
+
+  <!-- JAK SPUSTIT -->
+  <div class="sekce-title">🚀 Jak to celé spustit</div>
+
+  <div class="diagram-label">Otevři 3 terminály a spusť v každém jeden příkaz:</div>
+  <div class="diagram">
+Terminál 1:  go run sluzba_menu.go
+             → 🍕 Menu server běží na http://localhost:8081
+
+Terminál 2:  go run sluzba_dezerty.go
+             → 🍰 Dezert server běží na http://localhost:8082
+
+Terminál 3:  go run gateway.go
+             → 🌐 Gateway běží na http://localhost:8080
+
+Prohlížeč:   http://localhost:8080
+             → 🍽️ Uvidíš stránku se spojeným menu i dezerty!</div>
+
+  <div class="tip">
+    <strong>💡 Vyzkoušej také curl:</strong>
+    <div style="margin-top:.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:var(--muted)">
+      curl http://localhost:8081/menu<br>
+      curl http://localhost:8082/dezerty<br>
+      curl http://localhost:8080
+    </div>
+  </div>
+
+  <div class="ulohy">
+    <h3>✏️ Zkus to sám!</h3>
+    <ol>
+      <li>
+        Přidej do menu nové jídlo — třeba <code>"Sushi 🍣"</code> za 250 Kč. Pak objev stránku znovu.
+        <details class="reseni-detail">
+          <summary>🔍 Zobrazit nápovědu</summary>
+          <pre>{Nazev: "Sushi", Cena: 250, Emoji: "🍣"},</pre>
+        </details>
+      </li>
+      <li>
+        Vytvoř <strong>čtvrtou microservice</strong> — <code>sluzba_napoje.go</code> na portu <code>8083</code>
+        s limonádami, džusy a čaji. Přidej ji do gateway.
+        <details class="reseni-detail">
+          <summary>🔍 Zobrazit nápovědu</summary>
+          <pre>// sluzba_napoje.go — port 8083
+// V gateway přidej:
+napojeCh := make(chan string, 1)
+go func() { napojeCh &lt;- zavolajSluzbu("http://localhost:8083/napoje") }()
+napojeData := &lt;-napojeCh</pre>
+        </details>
+      </li>
+      <li>
+        Co se stane když zastavíš <strong>Menu server</strong> (Ctrl+C v Terminálu 1)
+        a pak obnovíš stránku v prohlížeči? Jak by ses mohl bránit?
+        <details class="reseni-detail">
+          <summary>🔍 Zobrazit nápovědu</summary>
+          <pre>// Gateway vrátí chybu pro menu, dezerty budou fungovat dál.
+// Ochrana: context.WithTimeout aby čekání nebylo nekonečné:
+ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+defer cancel()
+req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+resp, err := http.DefaultClient.Do(req)</pre>
+        </details>
+      </li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+
+  <div class="page-nav">
+    <a class="nav-btn" href="16_testovani.html">← Lekce 16: Testování</a>
+    <a class="nav-btn" href="../index.html">🏠 Zpět na přehled — jsi mistr! 🏆</a>
+  </div>
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 17 / 17</footer>
+
+<script>
+hljs.highlightAll();
+const SLUG = '17_microservices';
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  document.querySelector('.theme-btn').textContent = isLight ? '🌙' : '☀️';
+}
+if (localStorage.getItem('theme') === 'light') {
+  document.documentElement.classList.add('light');
+  document.querySelector('.theme-btn').textContent = '🌙';
+}
+function kopiruj(btn) {
+  const code = btn.nextElementSibling.querySelector('code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Zkopírováno! ✓';
+    setTimeout(() => btn.textContent = 'Kopírovat', 2000);
+  });
+}
+function oznacHotovo() {
+  const hotovo = new Set(JSON.parse(localStorage.getItem('hotovo') || '[]'));
+  const btn = document.getElementById('done-btn');
+  if (hotovo.has(SLUG)) {
+    hotovo.delete(SLUG);
+    btn.textContent = '☐ Označit lekci jako hotovou';
+    btn.classList.remove('done');
+  } else {
+    hotovo.add(SLUG);
+    btn.textContent = '✓ Lekce hotová! Skvělá práce! 🎉';
+    btn.classList.add('done');
+  }
+  localStorage.setItem('hotovo', JSON.stringify([...hotovo]));
+}
+(() => {
+  const hotovo = new Set(JSON.parse(localStorage.getItem('hotovo') || '[]'));
+  const btn = document.getElementById('done-btn');
+  if (hotovo.has(SLUG)) { btn.textContent = '✓ Lekce hotová! Skvělá práce! 🎉'; btn.classList.add('done'); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 15: Časový limit — context</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.3rem;margin:1rem 0;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#d2a8ff;white-space:pre;}
+.diagram-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.sekce-title{font-size:1.15rem;font-weight:700;color:#ffa657;margin:2rem 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+html.light .diagram{background:var(--code-bg);}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+  <nav class="zpet"><a href="../index.html">← Zpět na přehled lekcí</a></nav>
+
+  <div class="lekce-header">
+    <h1>⏱️ Lekce 15: Časový limit — context</h1>
+    <div class="meta">
+      <span>⭐⭐⭐⭐⭐ Výzva!</span>
+      <span>⏱️ ~35 minut</span>
+    </div>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>🤔 Co je context?</h3>
+    <p>
+      <code>context</code> je jako časomíra ve hře nebo stopky ve škole.
+      Řekneš: "Máš 2 sekundy na tah!" Pokud hráč nestihne, čas vyprší a hra pokračuje dál — bez čekání.
+    </p>
+    <p style="margin-top:.8rem;">V Go umí <code>context</code> tři věci:</p>
+    <ul style="margin:.5rem 0 .5rem 1.3rem;">
+      <li><strong>Timeout</strong> — "skonči do 2 sekund, jinak zruš"</li>
+      <li><strong>Cancel</strong> — "zruš to hned teď!"</li>
+      <li><strong>Hodnoty</strong> — předej informaci přes celý program (pokročilé)</li>
+    </ul>
+    <div class="analogie">
+      ⚽ context = píšťalka trenéra. Trenér řekne "Hraj!" (<code>context</code>) a po 90 minutách
+      zapíská (<code>cancel()</code>). Všichni hráči (goroutiny) naslouchají
+      <code>ctx.Done()</code> a ví, že mají zastavit.
+    </div>
+  </div>
+
+  <div class="diagram-label">Jak funguje context s timeoutem:</div>
+  <div class="diagram">ctx, cancel := context.WithTimeout(...)
+      ↓
+  goroutina 1 ←──── ctx.Done() ──── vypršel čas? → zastav!
+  goroutina 2 ←──── ctx.Done() ──── vypršel čas? → zastav!
+      ↓
+  cancel() ──────── okamžitě zruší všechny goroutiny</div>
+
+  <div class="sekce-title">⏰ Sekce 1: WithTimeout — časový limit na stahování</div>
+
+  <div class="vysvetleni">
+    <h3>💡 Jak to funguje?</h3>
+    <p>
+      Funkce <code>stahniFoto</code> používá <code>select</code> se dvěma kanály najednou.
+      Buď doběhne práce (<code>time.After</code>) nebo vyprší čas (<code>ctx.Done()</code>)
+      — co nastane dřív, to vyhraje.
+    </p>
+  </div>
+
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: 15a_timeout.go
+// Spusť: go run 15a_timeout.go
+
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+)
+
+// Simulujeme pomalou práci (třeba stahování ze sítě)
+func stahniFoto(ctx context.Context, nazev string, delay time.Duration) error {
+    fmt.Printf("📥 Stahuji: %s (bude trvat %v)\n", nazev, delay)
+
+    select {
+    case &lt;-time.After(delay):    // práce dokončena
+        fmt.Printf("✅ Staženo: %s\n", nazev)
+        return nil
+    case &lt;-ctx.Done():           // čas vypršel!
+        return fmt.Errorf("⏰ timeout: %s nestaženo (%v)", nazev, ctx.Err())
+    }
+}
+
+func main() {
+    fmt.Println("=== Stahujeme fotky (limit: 1 sekunda) ===\n")
+
+    // Vytvoříme context s limitem 1 sekundy
+    ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+    defer cancel() // vždy uvolni zdroje!
+
+    fotky := []struct {
+        jmeno string
+        cas   time.Duration
+    }{
+        {"kocka.jpg",      200 * time.Millisecond},
+        {"pes.jpg",        500 * time.Millisecond},
+        {"slon.jpg",       800 * time.Millisecond},
+        {"dinosaurus.jpg", 1500 * time.Millisecond}, // příliš pomalé!
+    }
+
+    for _, f := range fotky {
+        err := stahniFoto(ctx, f.jmeno, f.cas)
+        if err != nil {
+            fmt.Println("❌ Chyba:", err)
+        }
+    }
+
+    fmt.Println("\nHotovo!")
+}</code></pre>
+  </div>
+
+  <div class="vystup-label">Očekávaný výstup:</div>
+  <div class="vystup">=== Stahujeme fotky (limit: 1 sekunda) ===
+
+📥 Stahuji: kocka.jpg (bude trvat 200ms)
+✅ Staženo: kocka.jpg
+📥 Stahuji: pes.jpg (bude trvat 500ms)
+✅ Staženo: pes.jpg
+📥 Stahuji: slon.jpg (bude trvat 800ms)
+❌ Chyba: ⏰ timeout: slon.jpg nestaženo (context deadline exceeded)
+❌ Chyba: ⏰ timeout: dinosaurus.jpg nestaženo (context deadline exceeded)
+
+Hotovo!</div>
+
+  <div class="vysvetleni">
+    <h3>🧐 Proč slon.jpg selže?</h3>
+    <p>
+      Limit je 1 sekunda celkem. <code>kocka.jpg</code> (200 ms) a <code>pes.jpg</code> (500 ms)
+      dohromady zaberou 700 ms — to stihnou. Potom zbývá jen 300 ms, ale
+      <code>slon.jpg</code> potřebuje 800 ms — čas vyprší! A na <code>dinosaurus.jpg</code>
+      nezbyde vůbec nic.
+    </p>
+  </div>
+
+  <div class="sekce-title">📯 Sekce 2: WithCancel — okamžité zrušení (fotbalový zápas)</div>
+
+  <div class="vysvetleni">
+    <h3>💡 Rozdíl: Timeout vs Cancel</h3>
+    <p>
+      <code>WithTimeout</code> — automaticky se zruší po uplynutí doby.<br>
+      <code>WithCancel</code> — zruší se až když ty sám zavoláš <code>cancel()</code>.
+      To se hodí, když chceš zastavit goroutiny na základě nějaké události (třeba uživatel
+      stiskne tlačítko "Stop").
+    </p>
+  </div>
+
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: 15b_cancel.go
+// Spusť: go run 15b_cancel.go
+
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+)
+
+// Hráč hraje dokud ho trenér píšťalkou nezastaví
+func hrac(ctx context.Context, jmeno string) {
+    for {
+        select {
+        case &lt;-ctx.Done():
+            fmt.Printf("🛑 %s slyší píšťalku — zastavuje!\n", jmeno)
+            return
+        default:
+            fmt.Printf("⚽ %s hraje...\n", jmeno)
+            time.Sleep(400 * time.Millisecond)
+        }
+    }
+}
+
+func main() {
+    fmt.Println("=== Fotbalový zápas ===\n")
+
+    ctx, cancel := context.WithCancel(context.Background())
+
+    // Spustíme hráče
+    go hrac(ctx, "Tomáš")
+    go hrac(ctx, "Marie")
+    go hrac(ctx, "Karel")
+
+    // Necháme hrát 1.2 sekundy
+    time.Sleep(1200 * time.Millisecond)
+
+    // Trenér píšťalkou zastaví všechny!
+    fmt.Println("\n📯 Trenér píská — konec zápasu!")
+    cancel()
+
+    time.Sleep(200 * time.Millisecond) // počkáme na zastavení goroutin
+    fmt.Println("\n🏆 Zápas skončil!")
+}</code></pre>
+  </div>
+
+  <div class="vystup-label">Ukázkový výstup (pořadí hráčů se může lišit):</div>
+  <div class="vystup">=== Fotbalový zápas ===
+
+⚽ Tomáš hraje...
+⚽ Marie hraje...
+⚽ Karel hraje...
+⚽ Tomáš hraje...
+⚽ Marie hraje...
+⚽ Karel hraje...
+⚽ Tomáš hraje...
+...
+
+📯 Trenér píská — konec zápasu!
+🛑 Tomáš slyší píšťalku — zastavuje!
+🛑 Marie slyší píšťalku — zastavuje!
+🛑 Karel slyší píšťalku — zastavuje!
+
+🏆 Zápas skončil!</div>
+
+  <div class="vysvetleni">
+    <h3>📌 Důležité: vždy volej <code>defer cancel()</code></h3>
+    <p>
+      Ať už použiješ <code>WithTimeout</code> nebo <code>WithCancel</code>, vždy ihned po
+      vytvoření kontextu napiš <code>defer cancel()</code>. Tím uvolníš paměť a systémové
+      zdroje, i když program skončí normálně. Je to dobrý zvyk!
+    </p>
+  </div>
+
+  <div class="ulohy">
+    <h3>🏋️ Úlohy k procvičení</h3>
+    <ol>
+      <li>
+        Změň timeout na <code>600ms</code> — které fotky se stihnou stáhnout?
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>ctx, cancel := context.WithTimeout(context.Background(), 600*time.Millisecond)
+// Stihnou se jen kocka.jpg (200ms) a pes.jpg (500ms).
+// Celkem 700ms &gt; 600ms, takže pes.jpg ještě stihne (500ms &lt; 600ms),
+// ale slon.jpg (800ms) a dinosaurus.jpg (1500ms) nestihnou.</pre>
+        </details>
+      </li>
+      <li>
+        Přidej 4. hráče "Eva" do fotbalového zápasu.
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>// Přidej jeden řádek za go hrac(ctx, "Karel"):
+go hrac(ctx, "Eva")
+// Eva bude hrát a zastaví se spolu s ostatními po cancel().</pre>
+        </details>
+      </li>
+      <li>
+        Změň čas zápasu ze <code>1.2s</code> na <code>2s</code> — kolik kol hráči odehrají?
+        <details class="reseni-detail">
+          <summary>Zobrazit řešení</summary>
+          <pre>time.Sleep(2000 * time.Millisecond)
+// Každý hráč hraje každých 400ms.
+// Za 2 sekundy odehrají přibližně 5 kol (2000 / 400 = 5).
+// Výpis bude delší — uvidíš víc řádků "hraje...".</pre>
+        </details>
+      </li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+
+  <div class="page-nav">
+    <a href="14_errgroup.html" class="nav-btn">← Chyby v týmu — errgroup</a>
+    <a href="16_testovani.html" class="nav-btn">Testování — go test →</a>
+  </div>
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 15 / 16</footer>
+<script>
+hljs.highlightAll();
+const SLUG='15_context';
+function toggleTheme(){const isLight=document.documentElement.classList.toggle('light');localStorage.setItem('theme',isLight?'light':'dark');document.querySelector('.theme-btn').textContent=isLight?'🌙':'☀️';}
+if(localStorage.getItem('theme')==='light'){document.documentElement.classList.add('light');document.querySelector('.theme-btn').textContent='🌙';}
+function kopiruj(btn){const code=btn.nextElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='Zkopírováno! ✓';setTimeout(()=>btn.textContent='Kopírovat',2000);});}
+function oznacHotovo(){const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){hotovo.delete(SLUG);btn.textContent='☐ Označit lekci jako hotovou';btn.classList.remove('done');}else{hotovo.add(SLUG);btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}localStorage.setItem('hotovo',JSON.stringify([...hotovo]));}
+(()=>{const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}})();
+</script>
+</body>
+</html>
