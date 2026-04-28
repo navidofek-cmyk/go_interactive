@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 06: Postavičky — struktury</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+  <nav class="zpet"><a href="../index.html">← Zpět na přehled lekcí</a></nav>
+
+  <div class="lekce-header">
+    <h1>Lekce 06: 🧩 Postavičky — struktury</h1>
+    <div class="meta">
+      <span>📄 06_struktury.go</span>
+      <span>⭐⭐⭐ Střední</span>
+      <span>⏱ ~30 minut</span>
+    </div>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>🤔 Co se naučíš?</h3>
+    <p>Struktura (<code>struct</code>) je jako <strong>hráčská karta ve videohře</strong>. Na kartě jsou různé informace dohromady: jméno, životy, level, zbraň. Všechno popisuje jednu věc — jednoho hráče. Ke struktuře pak přidáme <strong>metody</strong> — to jsou akce, které hráč umí dělat.</p>
+    <div class="analogie">💡 Struct = Pokémon karta. Každá karta má: jméno, HP, typ, útok. Struct ti umožní vytvořit libovolnou vlastní "kartu" pro cokoliv — hráče, zvíře, auto, planetu!</div>
+  </div>
+
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: 06_struktury.go
+// Spusť: go run 06_struktury.go
+
+package main
+
+import "fmt"
+
+// Hráčská karta — struct
+type Hrac struct {
+    Jmeno  string
+    Zivoty int
+    Level  int
+    Zbran  string
+}
+
+// Metoda — Hrac umí vypsat svou kartu
+func (h Hrac) VypisKartu() {
+    fmt.Println("┌─────────────────────────┐")
+    fmt.Printf( "│ 🎮 %-22s│\n", h.Jmeno)
+    fmt.Printf( "│ ❤️  Životy: %-13d│\n", h.Zivoty)
+    fmt.Printf( "│ ⭐ Level:   %-13d│\n", h.Level)
+    fmt.Printf( "│ ⚔️  Zbraň:  %-13s│\n", h.Zbran)
+    fmt.Println("└─────────────────────────┘")
+}
+
+// Metoda která mění hráče — potřebuje * (ukazatel)
+func (h *Hrac) SeberePoklad(body int) {
+    fmt.Printf("🎁 %s sebral poklad! +%d level\n", h.Jmeno, body)
+    h.Level += body
+}
+
+func (h *Hrac) UtrpiPoskozeni(skoda int) {
+    h.Zivoty -= skoda
+    if h.Zivoty &lt; 0 {
+        h.Zivoty = 0
+    }
+    fmt.Printf("💥 %s dostal %d poškození! Životy: %d\n", h.Jmeno, skoda, h.Zivoty)
+}
+
+func main() {
+    // Vytvoříme hráče
+    hrac1 := Hrac{
+        Jmeno:  "Tomáš",
+        Zivoty: 100,
+        Level:  1,
+        Zbran:  "meč",
+    }
+
+    hrac2 := Hrac{
+        Jmeno:  "Marie",
+        Zivoty: 80,
+        Level:  3,
+        Zbran:  "luk",
+    }
+
+    fmt.Println("=== Hráčské karty ===")
+    hrac1.VypisKartu()
+    fmt.Println()
+    hrac2.VypisKartu()
+    fmt.Println()
+
+    // Simulujeme hru!
+    fmt.Println("=== Průběh hry ===")
+    hrac1.SeberePoklad(5)
+    hrac1.UtrpiPoskozeni(30)
+    hrac2.SeberePoklad(2)
+    hrac2.UtrpiPoskozeni(10)
+
+    fmt.Println("\n=== Stav po boji ===")
+    hrac1.VypisKartu()
+    fmt.Println()
+    hrac2.VypisKartu()
+
+    fmt.Println("\nSkvělé! Umíš vytvářet herní postavičky! 🎉")
+}</code></pre>
+  </div>
+
+  <div class="vystup-label">📺 Co program vypíše:</div>
+  <div class="vystup">=== Hráčské karty ===
+┌─────────────────────────┐
+│ 🎮 Tomáš                │
+│ ❤️  Životy: 100          │
+│ ⭐ Level:   1            │
+│ ⚔️  Zbraň:  meč          │
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│ 🎮 Marie                │
+│ ❤️  Životy: 80           │
+│ ⭐ Level:   3            │
+│ ⚔️  Zbraň:  luk          │
+└─────────────────────────┘
+
+=== Průběh hry ===
+🎁 Tomáš sebral poklad! +5 level
+💥 Tomáš dostal 30 poškození! Životy: 70
+🎁 Marie sebral poklad! +2 level
+💥 Marie dostal 10 poškození! Životy: 70
+
+=== Stav po boji ===
+┌─────────────────────────┐
+│ 🎮 Tomáš                │
+│ ❤️  Životy: 70           │
+│ ⭐ Level:   6            │
+│ ⚔️  Zbraň:  meč          │
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│ 🎮 Marie                │
+│ ❤️  Životy: 70           │
+│ ⭐ Level:   5            │
+│ ⚔️  Zbraň:  luk          │
+└─────────────────────────┘
+
+Skvělé! Umíš vytvářet herní postavičky! 🎉</div>
+
+  <div class="ulohy">
+    <h3>✏️ Zkus to sám!</h3>
+    <ol>
+      <li>
+        Přidej do struct <code>Hrac</code> pole <code>Mana int</code> a nastav ho na 50 pro každého hráče.
+        <details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>// Do struct přidej:
+Mana int
+
+// Při vytváření hráče:
+hrac1 := Hrac{Jmeno: "Tomáš", Zivoty: 100, Level: 1, Zbran: "meč", Mana: 50}
+
+// Do VypisKartu přidej:
+fmt.Printf("│ 💙 Mana:    %-13d│\n", h.Mana)</pre></details>
+      </li>
+      <li>
+        Vytvoř třetího hráče s vlastním jménem a zbraní.
+        <details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>hrac3 := Hrac{
+    Jmeno:  "Karel",
+    Zivoty: 90,
+    Level:  2,
+    Zbran:  "sekera",
+}
+hrac3.VypisKartu()</pre></details>
+      </li>
+      <li>
+        Přidej metodu <code>Vylec(hp int)</code> která přidá životy, ale maximálně do 100.
+        <details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>func (h *Hrac) Vylec(hp int) {
+    h.Zivoty += hp
+    if h.Zivoty &gt; 100 {
+        h.Zivoty = 100
+    }
+    fmt.Printf("💚 %s se vyléčil na %d životů!\n", h.Jmeno, h.Zivoty)
+}</pre></details>
+      </li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+
+  <div class="page-nav">
+    <a class="nav-btn" href="05_slice_map.html">← Lekce 05: Seznamy</a>
+    <a class="nav-btn" href="07_rozhrani.html">Lekce 07: Superschopnosti →</a>
+  </div>
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 06 / 12</footer>
+<script>
+hljs.highlightAll();
+const SLUG='06_struktury';
+function toggleTheme(){const isLight=document.documentElement.classList.toggle('light');localStorage.setItem('theme',isLight?'light':'dark');document.querySelector('.theme-btn').textContent=isLight?'🌙':'☀️';}
+if(localStorage.getItem('theme')==='light'){document.documentElement.classList.add('light');document.querySelector('.theme-btn').textContent='🌙';}
+function kopiruj(btn){const code=btn.nextElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='Zkopírováno! ✓';setTimeout(()=>btn.textContent='Kopírovat',2000);});}
+function oznacHotovo(){const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){hotovo.delete(SLUG);btn.textContent='☐ Označit lekci jako hotovou';btn.classList.remove('done');}else{hotovo.add(SLUG);btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}localStorage.setItem('hotovo',JSON.stringify([...hotovo]));}
+(()=>{const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}})();
+</script>
+</body>
+</html>

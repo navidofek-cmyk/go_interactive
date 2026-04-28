@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 11: 🧬 Kouzelné funkce — generika</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+  <nav class="zpet"><a href="../index.html">← Zpět na přehled lekcí</a></nav>
+  <div class="lekce-header">
+    <h1>🧬 Kouzelné funkce — generika</h1>
+    <div class="meta">
+      <span>📄 11_generika.go</span>
+      <span>⭐⭐⭐⭐ Těžší</span>
+      <span>⏱ ~30 minut</span>
+    </div>
+  </div>
+  <div class="vysvetleni">
+    <h3>🤔 Co se naučíš?</h3>
+    Generická funkce je kouzelná — funguje s čísly, textem, i čímkoliv jiným! Normálně musíš psát zvláštní funkci pro každý typ. S generikami stačí jedna! Typ <code>T</code> je jako zástupné místo — Go ho vyplní správným typem automaticky.
+    <div class="analogie">💡 Generika = kouzelný universální dálkový ovladač. Jeden ovladač ovládá TV, rádio, DVD přehrávač — všechno! Bez generiky bys potřeboval zvláštní ovladač pro každé zařízení.</div>
+  </div>
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">package main
+
+import "fmt"
+
+// Normální funkce — jen pro int
+func nejvetsiInt(a int, b int) int {
+    if a &gt; b { return a }
+    return b
+}
+
+// Generická funkce — funguje pro COKOLIV co lze porovnat!
+// [T int | float64 | string] znamená "T může být jeden z těchto typů"
+func nejvetsi[T int | float64 | string](a T, b T) T {
+    if a &gt; b { return a }
+    return b
+}
+
+// Generický zásobník (stack) — jako věž z kostek
+type Vez[T any] struct {
+    kostky []T
+}
+
+func (v *Vez[T]) Poloz(kostka T) {
+    v.kostky = append(v.kostky, kostka)
+    fmt.Printf("  📦 Položil: %v\n", kostka)
+}
+
+func (v *Vez[T]) Vezmi() T {
+    n := len(v.kostky)
+    kostka := v.kostky[n-1]
+    v.kostky = v.kostky[:n-1]
+    fmt.Printf("  🤏 Vzal:    %v\n", kostka)
+    return kostka
+}
+
+func (v *Vez[T]) Vyska() int { return len(v.kostky) }
+
+func main() {
+    fmt.Println("=== Kouzelná funkce nejvetsi ===")
+    fmt.Println("Větší číslo (3, 7):", nejvetsi(3, 7))
+    fmt.Println("Větší číslo (3.14, 2.71):", nejvetsi(3.14, 2.71))
+    fmt.Println("Větší slovo:", nejvetsi("jablko", "pomeranč"))
+    fmt.Println()
+
+    fmt.Println("=== Věž z číselných kostek ===")
+    ciselnaVez := Vez[int]{}
+    ciselnaVez.Poloz(1)
+    ciselnaVez.Poloz(2)
+    ciselnaVez.Poloz(3)
+    fmt.Printf("Výška věže: %d\n\n", ciselnaVez.Vyska())
+
+    ciselnaVez.Vezmi()
+    ciselnaVez.Vezmi()
+    fmt.Printf("Výška věže po odebrání: %d\n\n", ciselnaVez.Vyska())
+
+    fmt.Println("=== Věž ze slov ===")
+    slovniVez := Vez[string]{}
+    slovniVez.Poloz("🍎 jablko")
+    slovniVez.Poloz("🍌 banán")
+    slovniVez.Poloz("🍇 hrozny")
+    fmt.Println()
+    slovniVez.Vezmi()
+
+    fmt.Println("\nSkvělé! Generika jsou opravdu kouzelné! 🧬🎉")
+}</code></pre>
+  </div>
+  <div class="vystup-label">📺 Co program vypíše:</div>
+  <div class="vystup">=== Kouzelná funkce nejvetsi ===
+Větší číslo (3, 7): 7
+Větší číslo (3.14, 2.71): 3.14
+Větší slovo: pomeranč
+
+=== Věž z číselných kostek ===
+  📦 Položil: 1
+  📦 Položil: 2
+  📦 Položil: 3
+Výška věže: 3
+
+  🤏 Vzal:    3
+  🤏 Vzal:    2
+Výška věže po odebrání: 1
+
+=== Věž ze slov ===
+  📦 Položil: 🍎 jablko
+  📦 Položil: 🍌 banán
+  📦 Položil: 🍇 hrozny
+
+  🤏 Vzal:    🍇 hrozny
+
+Skvělé! Generika jsou opravdu kouzelné! 🧬🎉</div>
+  <div class="ulohy">
+    <h3>✏️ Zkus to sám!</h3>
+    <ol>
+      <li>Zavolej <code>nejvetsi("ahoj", "čau")</code> — které slovo je větší?<details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>fmt.Println(nejvetsi("ahoj", "čau"))
+// Vypíše "čau" — písmeno č je v abecedě za a, takže "čau" &gt; "ahoj"</pre></details></li>
+      <li>Vytvoř věž z bool hodnot a vlož <code>true</code>, <code>false</code>, <code>true</code>.<details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>boolVez := Vez[bool]{}
+boolVez.Poloz(true)
+boolVez.Poloz(false)
+boolVez.Poloz(true)</pre></details></li>
+      <li>Přidej do <code>Vez</code> metodu <code>JePrazdna() bool</code> která vrátí <code>true</code> pokud je věž prázdná.<details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>func (v *Vez[T]) JePrazdna() bool {
+    return len(v.kostky) == 0
+}</pre></details></li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+  <div class="page-nav">
+    <a class="nav-btn" href="10_channels.html">← Lekce 10: Posílání zpráv</a>
+    <a class="nav-btn" href="12_http_server.html">Lekce 12: Vlastní web →</a>
+  </div>
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 11 / 12</footer>
+<script>
+hljs.highlightAll();
+const SLUG='11_generika';
+function toggleTheme(){const isLight=document.documentElement.classList.toggle('light');localStorage.setItem('theme',isLight?'light':'dark');document.querySelector('.theme-btn').textContent=isLight?'🌙':'☀️';}
+if(localStorage.getItem('theme')==='light'){document.documentElement.classList.add('light');document.querySelector('.theme-btn').textContent='🌙';}
+function kopiruj(btn){const code=btn.nextElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='Zkopírováno! ✓';setTimeout(()=>btn.textContent='Kopírovat',2000);});}
+function oznacHotovo(){const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){hotovo.delete(SLUG);btn.textContent='☐ Označit lekci jako hotovou';btn.classList.remove('done');}else{hotovo.add(SLUG);btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}localStorage.setItem('hotovo',JSON.stringify([...hotovo]));}
+(()=>{const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}})();
+</script>
+</body>
+</html>

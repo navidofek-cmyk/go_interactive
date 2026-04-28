@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lekce 04: Funkce — vlastní příkazy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  <style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--code-bg:#1c2128;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:1.5rem;}
+main{max-width:900px;margin:2rem auto;padding:0 1.5rem;}
+.lekce-header{margin-bottom:1.5rem;}
+.lekce-header h1{font-size:1.9rem;margin-bottom:.5rem;}
+.meta{color:var(--muted);font-size:.9rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.vysvetleni{background:var(--surface);border-left:4px solid var(--accent);padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin-bottom:1.5rem;font-size:1rem;color:var(--text);line-height:1.8;}
+.vysvetleni h3{color:var(--accent);margin-bottom:.5rem;}
+.vysvetleni .analogie{background:var(--code-bg);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0;font-style:italic;color:#ffa657;}
+.kod-wrap{position:relative;margin-bottom:1.5rem;}
+.copy-btn{position:absolute;top:.6rem;right:.6rem;background:var(--border);border:none;color:var(--text);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;opacity:.7;z-index:1;}
+.copy-btn:hover{opacity:1;}
+pre.kod{background:var(--code-bg)!important;border:1px solid var(--border);border-radius:10px;padding:1.3rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;font-size:.9rem;line-height:1.6;margin:0;}
+pre.kod code{background:transparent!important;padding:0!important;font-size:inherit;}
+.hljs{background:transparent!important;}
+.vystup{background:#0a1f0a;border:1px solid #1a4a1a;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.88rem;color:#3fb950;white-space:pre;}
+.vystup-label{font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+.ulohy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-top:1.5rem;}
+.ulohy h3{margin-bottom:.8rem;color:#ffa657;font-size:1.1rem;}
+.ulohy ol{margin-left:1.3rem;}
+.ulohy li{margin-bottom:.7rem;font-size:.97rem;}
+.reseni-detail{margin-top:.4rem;}
+.reseni-detail summary{color:var(--accent);cursor:pointer;font-size:.88rem;}
+.reseni-detail pre{margin-top:.5rem;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.86rem;overflow-x:auto;font-family:'Cascadia Code','Fira Code',monospace;}
+.page-nav{display:flex;justify-content:space-between;margin:2rem 0;gap:1rem;}
+.nav-btn{background:var(--surface);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.93rem;}
+.nav-btn:hover{border-color:var(--accent);text-decoration:none;}
+nav.zpet{margin-bottom:1.5rem;}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem;border-top:1px solid var(--border);margin-top:3rem;}
+.done-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:1rem;display:block;}
+.done-btn.done{border-color:var(--green);color:var(--green);font-weight:700;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text);padding:.3rem .8rem;border-radius:8px;cursor:pointer;font-size:.9rem;}
+html.light{--bg:#f0f6ff;--surface:#ffffff;--border:#d0d7de;--text:#1f2328;--muted:#636c76;--accent:#0969da;--green:#1a7f37;--code-bg:#f6f8fa;}
+html.light pre.kod{background:var(--code-bg)!important;}
+html.light .vystup{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;}
+  </style>
+</head>
+<body>
+<header>
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">🐹 Naučíme se Go!</a></h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <a href="../index.html" style="font-size:.9rem">← Přehled</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</header>
+<main>
+  <nav class="zpet"><a href="../index.html">← Zpět na přehled lekcí</a></nav>
+
+  <div class="lekce-header">
+    <h1>Lekce 04: 🔧 Funkce — vlastní příkazy</h1>
+    <div class="meta">
+      <span>📄 04_funkce.go</span>
+      <span>⭐⭐ Snadné</span>
+      <span>⏱ ~25 minut</span>
+    </div>
+  </div>
+
+  <div class="vysvetleni">
+    <h3>🤔 Co se naučíš?</h3>
+    <p>Funkce je jako <strong>recept</strong>. Napíšeš recept jednou a pak ho můžeš použít kolikrát chceš! Třeba funkce <code>pozdrav</code> — zavoláš ji a funkce pozdraví. Nemusíš psát postup znovu a znovu. Funkce mohou dostávat <strong>vstupy</strong> (co jim dáš) a vracet <strong>výsledek</strong> (co ti vrátí zpět).</p>
+    <div class="analogie">💡 Funkce = recept na jídlo. Napíšeš ho jednou, kuchař ho může použít 100×. Nebo tlačítko na dálkovém ovladači — stiskneš a TV se zapne. Pokaždé stejný výsledek!</div>
+  </div>
+
+  <div class="kod-wrap">
+    <button class="copy-btn" onclick="kopiruj(this)">Kopírovat</button>
+    <pre class="kod"><code class="language-go">// Soubor: 04_funkce.go
+// Spusť: go run 04_funkce.go
+
+package main
+
+import "fmt"
+
+// Funkce bez návratové hodnoty
+func pozdrav(jmeno string) {
+    fmt.Printf("Ahoj, %s! 👋\n", jmeno)
+}
+
+// Funkce s návratovou hodnotou
+func secti(a int, b int) int {
+    return a + b
+}
+
+// Funkce vrací dvě hodnoty najednou!
+func minMax(a int, b int) (int, int) {
+    if a &lt; b {
+        return a, b
+    }
+    return b, a
+}
+
+// Funkce kreslí zdravotní bar jako ve hře
+func zdraviBar(aktualni int, max int) {
+    fmt.Print("❤️  [")
+    for i := 0; i &lt; max; i++ {
+        if i &lt; aktualni {
+            fmt.Print("█")
+        } else {
+            fmt.Print("░")
+        }
+    }
+    fmt.Printf("] %d/%d\n", aktualni, max)
+}
+
+func main() {
+    // Voláme naše funkce!
+    pozdrav("Tomáš")
+    pozdrav("Marie")
+    pozdrav("Robot Go")
+    fmt.Println()
+
+    vysledek := secti(5, 3)
+    fmt.Println("5 + 3 =", vysledek)
+    fmt.Println("10 + 25 =", secti(10, 25))
+    fmt.Println()
+
+    mensi, vetsi := minMax(42, 17)
+    fmt.Println("Menší číslo:", mensi)
+    fmt.Println("Větší číslo:", vetsi)
+    fmt.Println()
+
+    // Zdravotní bar jako ve hře!
+    fmt.Println("=== Zdraví hráčů ===")
+    zdraviBar(10, 10) // plné zdraví
+    zdraviBar(7, 10)  // 70% zdraví
+    zdraviBar(3, 10)  // kritické!
+    zdraviBar(0, 10)  // mrtvý
+
+    fmt.Println("\nSkvělé! Umíš psát vlastní funkce! 🎉")
+}</code></pre>
+  </div>
+
+  <div class="vystup-label">📺 Co program vypíše:</div>
+  <div class="vystup">Ahoj, Tomáš! 👋
+Ahoj, Marie! 👋
+Ahoj, Robot Go! 👋
+
+5 + 3 = 8
+10 + 25 = 35
+
+Menší číslo: 17
+Větší číslo: 42
+
+=== Zdraví hráčů ===
+❤️  [██████████] 10/10
+❤️  [███████░░░] 7/10
+❤️  [███░░░░░░░] 3/10
+❤️  [░░░░░░░░░░] 0/10
+
+Skvělé! Umíš psát vlastní funkce! 🎉</div>
+
+  <div class="ulohy">
+    <h3>✏️ Zkus to sám!</h3>
+    <ol>
+      <li>
+        Vytvoř funkci <code>nasob(a int, b int) int</code> která vrátí a * b a zavolej ji.
+        <details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>func nasob(a int, b int) int {
+    return a * b
+}
+// v main():
+fmt.Println("6 * 7 =", nasob(6, 7))</pre></details>
+      </li>
+      <li>
+        Zavolej <code>zdraviBar(5, 20)</code> — jaký výsledek dostaneš?
+        <details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>zdraviBar(5, 20)
+// Vypíše: ❤️  [█████░░░░░░░░░░░░░░░] 5/20</pre></details>
+      </li>
+      <li>
+        Vytvoř funkci <code>pozdravAnglicky(jmeno string)</code> která vypíše "Hello, jméno!".
+        <details class="reseni-detail"><summary>🔍 Zobrazit nápovědu</summary><pre>func pozdravAnglicky(jmeno string) {
+    fmt.Printf("Hello, %s!\n", jmeno)
+}</pre></details>
+      </li>
+    </ol>
+    <button class="done-btn" id="done-btn" onclick="oznacHotovo()">☐ Označit lekci jako hotovou</button>
+  </div>
+
+  <div class="page-nav">
+    <a class="nav-btn" href="03_ridici_struktury.html">← Lekce 03: Rozhodování</a>
+    <a class="nav-btn" href="05_slice_map.html">Lekce 05: Seznamy →</a>
+  </div>
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Lekce 04 / 12</footer>
+<script>
+hljs.highlightAll();
+const SLUG='04_funkce';
+function toggleTheme(){const isLight=document.documentElement.classList.toggle('light');localStorage.setItem('theme',isLight?'light':'dark');document.querySelector('.theme-btn').textContent=isLight?'🌙':'☀️';}
+if(localStorage.getItem('theme')==='light'){document.documentElement.classList.add('light');document.querySelector('.theme-btn').textContent='🌙';}
+function kopiruj(btn){const code=btn.nextElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='Zkopírováno! ✓';setTimeout(()=>btn.textContent='Kopírovat',2000);});}
+function oznacHotovo(){const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){hotovo.delete(SLUG);btn.textContent='☐ Označit lekci jako hotovou';btn.classList.remove('done');}else{hotovo.add(SLUG);btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}localStorage.setItem('hotovo',JSON.stringify([...hotovo]));}
+(()=>{const hotovo=new Set(JSON.parse(localStorage.getItem('hotovo')||'[]'));const btn=document.getElementById('done-btn');if(hotovo.has(SLUG)){btn.textContent='✓ Lekce hotová! Skvělá práce! 🎉';btn.classList.add('done');}})();
+</script>
+</body>
+</html>

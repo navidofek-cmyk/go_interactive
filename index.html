@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naučíme se Go! 🐹</title>
+  <style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --yellow: #d29922; --red: #f85149;
+  --code-bg: #1c2128; --orange: #ffa657; --purple: #d2a8ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text);
+       font-family: 'Segoe UI', system-ui, sans-serif;
+       font-size: 17px; line-height: 1.7; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+header { background: var(--surface); border-bottom: 1px solid var(--border);
+         padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+header h1 { font-size: 1.5rem; }
+header .badge { background: var(--accent); color: #000;
+                padding: .2rem .7rem; border-radius: 999px;
+                font-size: .8rem; font-weight: 700; }
+main { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
+
+.uvod { background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.uvod h2 { font-size: 1.3rem; margin-bottom: .8rem; color: var(--accent); }
+.uvod p  { color: var(--muted); margin-bottom: .5rem; }
+.uvod code { background: var(--code-bg); padding: .1rem .4rem;
+              border-radius: 4px; font-size: .9em; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr));
+        gap: 1rem; margin-top: 1.5rem; }
+.card { background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.1rem 1.3rem;
+        transition: border-color .2s, transform .15s;
+        display: flex; flex-direction: column; gap: .4rem; position: relative; }
+.card:hover { border-color: var(--accent); transform: translateY(-3px); text-decoration: none; }
+.card .num { color: var(--muted); font-size: .78rem; }
+.card-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+.card .popis { font-size: .82rem; color: var(--muted); }
+.card .stars { font-size: .85rem; margin-top: auto; padding-top: .3rem; }
+.card.hotovo { border-color: var(--green); }
+.card.hotovo::after { content: "✓ Hotovo!"; position: absolute; top: .5rem; right: .8rem;
+                       color: var(--green); font-size: .75rem; font-weight: 700; }
+
+.sekce { margin: 2rem 0; }
+.sekce-header { display: flex; align-items: center; gap: .8rem;
+                margin-bottom: 1rem; padding: .8rem 1rem;
+                border-radius: 10px; }
+.sekce-header h2 { font-size: 1.15rem; margin: 0; }
+.sekce-header p { color: var(--muted); font-size: .85rem; margin: .1rem 0 0; }
+.sekce-badge { margin-left: auto; font-size: .75rem;
+               padding: .2rem .6rem; border-radius: 999px; white-space: nowrap;
+               font-weight: 600; }
+
+.search-wrap { position: relative; margin: 1.2rem 0; }
+#hledej { width: 100%; padding: .7rem 1rem .7rem 2.6rem; background: var(--surface);
+           border: 1px solid var(--border); border-radius: 10px; color: var(--text);
+           font-size: 1rem; outline: none; }
+#hledej:focus { border-color: var(--accent); }
+#hledej::placeholder { color: var(--muted); }
+.search-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%);
+                color: var(--muted); pointer-events: none; font-size: 1rem; }
+#vysledky { position: absolute; width: 100%; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 10px; z-index: 99;
+             max-height: 320px; overflow-y: auto; top: calc(100% + 4px); }
+#vysledky a { display: block; padding: .55rem 1rem; color: var(--text);
+               border-bottom: 1px solid var(--border); }
+#vysledky a:last-child { border-bottom: none; }
+#vysledky a:hover { background: var(--code-bg); text-decoration: none; }
+#vysledky .hit-sekce { font-size: .75rem; color: var(--muted); }
+#vysledky:empty { display: none; }
+
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin: .5rem 0 .8rem; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .5s; }
+#progress-text { font-size: .85rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+.theme-btn { background: none; border: 1px solid var(--border); color: var(--text);
+              padding: .3rem .8rem; border-radius: 8px; cursor: pointer; font-size: .9rem; }
+.theme-btn:hover { border-color: var(--accent); }
+
+footer { text-align: center; color: var(--muted); font-size: .82rem;
+         padding: 2rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+
+html.light {
+  --bg: #f0f6ff; --surface: #ffffff; --border: #d0d7de;
+  --text: #1f2328; --muted: #636c76; --accent: #0969da;
+  --green: #1a7f37; --code-bg: #f6f8fa;
+}
+  </style>
+</head>
+<body>
+<header>
+  <h1>🐹 Naučíme se Go!</h1>
+  <div style="display:flex;gap:.7rem;align-items:center;margin-left:auto">
+    <span class="badge">12 lekcí</span>
+    <button class="theme-btn" onclick="toggleTheme()" title="Světlé / tmavé">☀️</button>
+  </div>
+</header>
+
+<main>
+  <div class="uvod">
+    <h2>👋 Vítej, mladý programátore!</h2>
+    <p>
+      <strong>Go</strong> je programovací jazyk — to je způsob, jak <strong>dávat příkazy počítači</strong>.
+      Je to jako mluvit s robotem, ale musíš mluvit přesně a jasně!
+    </p>
+    <p>
+      V každé lekci najdeš <strong>krátký program v Go</strong>, který si můžeš spustit sám.
+      Budeš dělat věci jako: vypisovat text, počítat, kreslit tvary, dělat kvízy a hry! 🎮
+    </p>
+    <p style="margin-top:.8rem">
+      <strong>Jak spustit lekci:</strong>
+      ulož kód do souboru <code>lekce.go</code> a napiš v terminálu <code>go run lekce.go</code>
+    </p>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="hledej" type="search"
+           placeholder="Hledej lekci… (např. smyčka, funkce, hra)"
+           autocomplete="off">
+    <div id="vysledky"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div id="progress-text">Zatím žádná lekce hotová. Pojď, začni první! 💪</div>
+
+  <!-- SEKCE 1 -->
+  <div class="sekce">
+    <div class="sekce-header" style="background:#161b22;border:1px solid #30363d;">
+      <span style="font-size:1.8rem">🌱</span>
+      <div>
+        <h2>Začínáme — úplné základy</h2>
+        <p>Co je Go, krabičky (proměnné), podmínky a smyčky</p>
+      </div>
+      <span class="sekce-badge" style="background:#1c3045;color:#58a6ff;">4 lekce</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="lekce/01_co_je_go.html" data-slug="01_co_je_go">
+        <div class="num">Lekce 01</div>
+        <div class="card-title">🐹 Co je Go? Ahoj, robote!</div>
+        <div class="popis">Napíšeme první program a pozdravíme svět</div>
+        <div class="stars">⭐ Velmi snadné</div>
+      </a>
+      <a class="card" href="lekce/02_promenne.html" data-slug="02_promenne">
+        <div class="num">Lekce 02</div>
+        <div class="card-title">📦 Krabičky — proměnné a typy</div>
+        <div class="popis">Ukládáme jméno, věk, oblíbené zvíře</div>
+        <div class="stars">⭐ Velmi snadné</div>
+      </a>
+      <a class="card" href="lekce/03_ridici_struktury.html" data-slug="03_ridici_struktury">
+        <div class="num">Lekce 03</div>
+        <div class="card-title">🤔 Rozhodování — if a switch</div>
+        <div class="popis">Počítač se ptá: Je to pravda? Co uděláme?</div>
+        <div class="stars">⭐⭐ Snadné</div>
+      </a>
+      <a class="card" href="lekce/04_funkce.html" data-slug="04_funkce">
+        <div class="num">Lekce 04</div>
+        <div class="card-title">🔄 Opakování — smyčky a funkce</div>
+        <div class="popis">Kreslíme hvězdičky a vytváříme vlastní příkazy</div>
+        <div class="stars">⭐⭐ Snadné</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- SEKCE 2 -->
+  <div class="sekce">
+    <div class="sekce-header" style="background:#161b22;border:1px solid #30363d;">
+      <span style="font-size:1.8rem">🗃️</span>
+      <div>
+        <h2>Sbírky věcí — seznamy a slovníky</h2>
+        <p>Jak ukládat víc věcí najednou a popisovat věci ve hře</p>
+      </div>
+      <span class="sekce-badge" style="background:#1a2f1a;color:#3fb950;">3 lekce</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="lekce/05_slice_map.html" data-slug="05_slice_map">
+        <div class="num">Lekce 05</div>
+        <div class="card-title">📋 Seznamy — slice a map</div>
+        <div class="popis">Nákupní lístek a slovník zvuků zvířat</div>
+        <div class="stars">⭐⭐ Snadné</div>
+      </a>
+      <a class="card" href="lekce/06_struktury.html" data-slug="06_struktury">
+        <div class="num">Lekce 06</div>
+        <div class="card-title">🧩 Postavičky — struktury</div>
+        <div class="popis">Vytvoříme hráče s jménem, životy a levelem</div>
+        <div class="stars">⭐⭐⭐ Střední</div>
+      </a>
+      <a class="card" href="lekce/07_rozhrani.html" data-slug="07_rozhrani">
+        <div class="num">Lekce 07</div>
+        <div class="card-title">🦸 Superschopnosti — rozhraní</div>
+        <div class="popis">Různá zvířata umí totéž — ale každé jinak</div>
+        <div class="stars">⭐⭐⭐ Střední</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- SEKCE 3 -->
+  <div class="sekce">
+    <div class="sekce-header" style="background:#161b22;border:1px solid #30363d;">
+      <span style="font-size:1.8rem">⚡</span>
+      <div>
+        <h2>Pokročilé — pro šikovné</h2>
+        <p>Chyby, závodění a komunikace</p>
+      </div>
+      <span class="sekce-badge" style="background:#2a1f3d;color:#d2a8ff;">3 lekce</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="lekce/08_chyby.html" data-slug="08_chyby">
+        <div class="num">Lekce 08</div>
+        <div class="card-title">🚨 Co když se něco pokazí?</div>
+        <div class="popis">Ošetřujeme chyby jako zkušený programátor</div>
+        <div class="stars">⭐⭐⭐ Střední</div>
+      </a>
+      <a class="card" href="lekce/09_goroutines.html" data-slug="09_goroutines">
+        <div class="num">Lekce 09</div>
+        <div class="card-title">🏃 Závodění — goroutiny</div>
+        <div class="popis">Více věcí najednou, jako tým kamarádů</div>
+        <div class="stars">⭐⭐⭐⭐ Těžší</div>
+      </a>
+      <a class="card" href="lekce/10_channels.html" data-slug="10_channels">
+        <div class="num">Lekce 10</div>
+        <div class="card-title">📬 Posílání zpráv — channels</div>
+        <div class="popis">Goroutiny si posílají zprávy jako SMS</div>
+        <div class="stars">⭐⭐⭐⭐ Těžší</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- SEKCE 4 -->
+  <div class="sekce">
+    <div class="sekce-header" style="background:#161b22;border:1px solid #30363d;">
+      <span style="font-size:1.8rem">🏆</span>
+      <div>
+        <h2>Finále — vlastní projekty!</h2>
+        <p>Generika a mini hra — ukážeš, co umíš</p>
+      </div>
+      <span class="sekce-badge" style="background:#2a2010;color:#ffa657;">2 lekce</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="lekce/11_generika.html" data-slug="11_generika">
+        <div class="num">Lekce 11</div>
+        <div class="card-title">🧬 Kouzelné funkce — generika</div>
+        <div class="popis">Jedna funkce pro čísla, slova i cokoliv jiného</div>
+        <div class="stars">⭐⭐⭐⭐ Těžší</div>
+      </a>
+      <a class="card" href="lekce/12_http_server.html" data-slug="12_http_server">
+        <div class="num">Lekce 12</div>
+        <div class="card-title">🌐 Vlastní web — HTTP server</div>
+        <div class="popis">Udělej svou vlastní webovou stránku!</div>
+        <div class="stars">⭐⭐⭐⭐⭐ Výzva!</div>
+      </a>
+    </div>
+  </div>
+
+</main>
+<footer>🐹 Go kurz pro mladé programátory · Učíme se děláním!</footer>
+
+<script>
+const LEKCE = [
+  {cislo:1,  titul:"Co je Go? Ahoj, robote!",          slug:"01_co_je_go",         sekce:"Základy"},
+  {cislo:2,  titul:"Krabičky — proměnné a typy",        slug:"02_promenne",          sekce:"Základy"},
+  {cislo:3,  titul:"Rozhodování — if a switch",          slug:"03_ridici_struktury",  sekce:"Základy"},
+  {cislo:4,  titul:"Opakování — smyčky a funkce",        slug:"04_funkce",            sekce:"Základy"},
+  {cislo:5,  titul:"Seznamy — slice a map",              slug:"05_slice_map",         sekce:"Sbírky"},
+  {cislo:6,  titul:"Postavičky — struktury",             slug:"06_struktury",         sekce:"Sbírky"},
+  {cislo:7,  titul:"Superschopnosti — rozhraní",         slug:"07_rozhrani",          sekce:"Sbírky"},
+  {cislo:8,  titul:"Co když se něco pokazí?",           slug:"08_chyby",             sekce:"Pokročilé"},
+  {cislo:9,  titul:"Závodění — goroutiny",               slug:"09_goroutines",        sekce:"Pokročilé"},
+  {cislo:10, titul:"Posílání zpráv — channels",          slug:"10_channels",          sekce:"Pokročilé"},
+  {cislo:11, titul:"Kouzelné funkce — generika",         slug:"11_generika",          sekce:"Finále"},
+  {cislo:12, titul:"Vlastní web — HTTP server",          slug:"12_http_server",       sekce:"Finále"},
+];
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  document.querySelector('.theme-btn').textContent = isLight ? '🌙' : '☀️';
+}
+if (localStorage.getItem('theme') === 'light') {
+  document.documentElement.classList.add('light');
+  document.querySelector('.theme-btn').textContent = '🌙';
+}
+
+const hotovo = new Set(JSON.parse(localStorage.getItem('hotovo') || '[]'));
+function obnovProgress() {
+  const done = hotovo.size, total = LEKCE.length;
+  document.getElementById('progress-fill').style.width = (done / total * 100) + '%';
+  const zpravy = [
+    'Zatím žádná lekce hotová. Pojď, začni první! 💪',
+    'Skvělý začátek! Pokračuj dál! 🌟',
+    'Úžasný pokrok! Jsi šikovný! 🎉',
+    '🏆 Všechny lekce hotové! Jsi GO hrdina!'
+  ];
+  document.getElementById('progress-text').textContent =
+    done === 0 ? zpravy[0] :
+    done === total ? zpravy[3] :
+    `${done} / ${total} lekcí hotových — ${zpravy[done < 4 ? 1 : 2].replace('!','!')}`;
+  document.querySelectorAll('.card').forEach(c => {
+    if (c.dataset.slug && hotovo.has(c.dataset.slug)) c.classList.add('hotovo');
+    else c.classList.remove('hotovo');
+  });
+}
+obnovProgress();
+
+const inp = document.getElementById('hledej');
+const res = document.getElementById('vysledky');
+inp.addEventListener('input', () => {
+  const q = inp.value.trim().toLowerCase();
+  res.innerHTML = '';
+  if (!q) return;
+  LEKCE.filter(l => l.titul.toLowerCase().includes(q) || l.sekce.toLowerCase().includes(q))
+    .slice(0, 8).forEach(l => {
+      const a = document.createElement('a');
+      a.href = 'lekce/' + l.slug + '.html';
+      a.innerHTML = `Lekce ${l.cislo}: ${l.titul} <span class="hit-sekce">— ${l.sekce}</span>`;
+      res.appendChild(a);
+    });
+});
+document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) res.innerHTML = ''; });
+</script>
+</body>
+</html>
